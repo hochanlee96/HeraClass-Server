@@ -3,10 +3,13 @@ const router = express.Router();
 // const passport = require("passport");
 // const Users = require("../models/user");
 const seedClasses = require('../seed');
+const passport = require('passport');
 
 
 router.get("/", function (req, res) {
+    console.log('class', req.isAuthenticated());
     res.send(seedClasses);
+
 })
 
 router.get("/:classId", function (req, res) {

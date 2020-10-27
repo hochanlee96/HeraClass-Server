@@ -1,87 +1,88 @@
-const express = require('express');
-const router = express.Router();
-// const passport = require("passport");
-// const Users = require("../models/user");
+var express = require("express"),
+    router = express.Router(),
+    passport = require("passport"),
+    User = require("../models/user");
 
-// let user = {email: 'test@test.com', password: 'a'};
 
-// router.get("/register", function(req, res){
-//     res.render("register");
-// });
-
-// router.post("/register", (req, res) => {
-//     Users.findOne({ email: req.body.email }, (err, foundUser) => {
-//         if(err){
-//             res.json({error: "Something went wrong!"});
-//         } else{
-//             if(foundUser){
-//                 res.json({error: "The user with this email already exists!"});
-//             }else{
-//                 Users.create(req.body, (err, user) => {
-//                     if(err){
-//                         res.json({error: err});
-//                     } else{
-//                         console.log('user created');
-//                         res.json({userId: user._id, username: user.username, email: user.email, expirationDate: new Date().getTime() + 3600000});
-//                     }
-//                 })
+//Routes
+// router.post("/register", function (req, res) {
+//     User.register(new User({ username: req.body.username, userId: req.body.userId, favorites: [] }), req.body.password, function (err, user) {
+//         if (err) {
+//             console.log(err);
+//             return res.send({ "error": err.message });
+//         }
+//         req.login(user, function (err) {
+//             if (err) {
+//                 res.send({ 'error': err.message })
 //             }
-//         }
-//     });
-// }); 
-
-// router.get("/login", function(req, res){
-//     res.json({error:'Fail'});
-// });
-
-// router.post("/login", passport.authenticate("local", {
-//     successRedirect: "/",
-//     failureRedirect: "/login"
-// }), function(req, res){
-// });
-
-// router.post("/login", (req,res) => {
-//     if(user.email === req.body.email && user.password === req.body.password){
-//         // res.data.email = req.body.email;
-//         // res.data.password = req.body.password;
-//         // res.redirect('/');
-//         res.json({...req.body, error: null});
-//     } else{
-//         res.redirect('/login');
-//     } 
-//     res.redirect('/home');
-// });
-
-// router.post("/login", (req,res) => {
-//     console.log(req.body)
-//     Users.findOne({email: req.body.email}, (err, foundUser) => {
-//         if(!foundUser || err){
-//             res.json({error: "User does not exist"});
-//         } else if(foundUser.password === req.body.password){
-//             res.json({userId: foundUser._id, email: foundUser.email, username: foundUser.username, expirationDate: new Date().getTime() + 3600000, error: null});
-//         } else{
-//             res.json({error: "Password Incorrect"});
-//         }
+//             console.log(req.session)
+//             return res.json(req.session)
+//         });
 //     })
 // });
+router.post("/register", function (req, res) {
+    User.register(new User({ email: req.body.email, username: req.body.username }), req.body.password, function (err, user) {
+        if (err) {
+            console.log(err);
+            return res.json({ error: err.message });
+        }
+        passport.authenticate("local")(req, res, function () {
+            console.log(req.isAuthenticated());
+            console.log(req.user);
+            res.redirect('/user-data');
+        });
+    });
+});
 
+router.post('/login', passport.authenticate('local'), function (req, res) {
+    res.redirect('/user-data')
+})
 
-// router.get("/logout", function(req, res){
-//     req.logout();
-//     // req.flash("success", "logged you out");
-//     res.redirect("/home");
+// router.post('/login', function (req, res, next) {
+//     passport.authenticate('local', function (err, user, info) {
+//         if (err) { return res.send({ 'error': err.message }) }
+//         if (user) { // 로그인 성공
+//             // console.log(user);
+//             // customCallback 사용시 req.logIn()메서드 필수
+//             console.log('session 1', req.session)
+//             req.logIn(user, function (err) {
+//                 console.log('user', user)
+//                 console.log('session 2', req.session)
+//                 if (err) { return next(err); }
+//                 console.log('logged in ', req.isAuthenticated());
+//                 // req.logout()
+//                 // console.log('logged out', req.isAuthenticated());
+//                 return res.redirect('/');
+//             });
+
+//         } else {	// 로그인 실패
+//             res.send({ 'error': 'login fail' });
+//         }
+//     })(req, res, next);
 // });
 
-router.get("/bye", function (req, res) {
-    var object = { "a": "b" }
-    res.send(object);
+router.get('/user-data', function (req, res) {
+    var user_info = null;
+    // console.log('req_user', req.user)
+    if (!req.user) {
+        console.log('session expired')
+    } else {
+        console.log('req.user one?', req.user)
+        user_info = {}
+        user_info.username = req.user.username;
+        user_info.email = req.user.email;
+        user_info.favorites = [...req.user.favorites];
+        user_info.expires = req.session.cookie.expires;
+        console.log('user!!', user_info)
+    }
+    return res.json(user_info);
 })
 
-router.get("/", function (req, res) {
-    res.send('Hello World!!!!!!');
-})
 
-
+router.get("/logout", function (req, res) {
+    req.logout();
+    res.json('logged out');
+});
 
 
 module.exports = router;
