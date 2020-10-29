@@ -9,7 +9,7 @@ var UserSchema = new mongoose.Schema({
         {
             // type: mongoose.Schema.Types.ObjectId,
             // ref: "Comment"
-            type: String
+            type: mongoose.Schema.Types.ObjectId
         }
     ]
 });

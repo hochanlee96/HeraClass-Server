@@ -1,24 +1,71 @@
 const express = require('express');
 const router = express.Router();
-// const passport = require("passport");
-// const Users = require("../models/user");
+const Class = require('../models/class');
 const seedClasses = require('../seed');
 const passport = require('passport');
+const middleware = require('../middleware');
 
 
 router.get("/", function (req, res) {
-    console.log('class', req.isAuthenticated());
-    res.send(seedClasses);
+    Class.find({}, (err, searchedClasses) => {
+        if (err) {
+            console.log(err)
+        } else {
+            res.send(searchedClasses);
+        }
+    })
 
+})
+
+
+router.get("/favorite", middleware.isLoggedIn, function (req, res) {
+    const favoriteClasses = req.user.favorites;
+    Class.find({ '_id': { $in: favoriteClasses } }, function (err, foundClasses) {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log(foundClasses)
+            res.send(foundClasses);
+        }
+    })
 })
 
 router.get("/:classId", function (req, res) {
     //get params
     const classId = req.params.classId;
-    //fetch the class from db
-    const fetchedClass = seedClasses.find(cl => cl.id === classId);
+    console.log(classId);
+    Class.findById(classId, (err, searchedClass) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(searchedClass);
+            res.send(searchedClass);
+        }
+    })
+})
 
-    res.send(fetchedClass)
+
+router.put('/update-followers', middleware.isLoggedIn, function (req, res) {
+    console.log(req.body)
+    if (req.body.add) {
+        Class.findByIdAndUpdate(req.body.classId, { $push: { followers: req.user.email } }, { safe: true, upsert: true, new: true }, function (err, foundClass) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(foundClass);
+                res.status(200).send();
+            }
+        })
+    } else {
+        Class.findByIdAndUpdate(req.body.classId, { $pull: { followers: req.user.email } }, { safe: true, upsert: true, new: true }, function (err, foundClass) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(foundClass);
+                res.status(200).send();
+            }
+        })
+    }
 })
 
 

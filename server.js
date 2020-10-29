@@ -5,16 +5,19 @@ var express = require('express'),
     passport = require("passport"),
     LocalStrategy = require("passport-local").Strategy,
     //  methodOverride = require("method-override"),
+    // classSaver = require('./classSaver'),
     User = require("./models/user");
 
 mongoose.connect("mongodb://localhost:27017/heraclass", { useNewUrlParser: true, useUnifiedTopology: true });
 // mongoose.connect("mongodb+srv://hochan:lee@cluster0.v5xbw.mongodb.net/yelp_camp?retryWrites=true&w=majority");
+// classSaver();
 const port = process.env.PORT || 3001;
 const cors = require('cors');
 
 
 const indexRoutes = require('./routes/index');
 const classRoutes = require('./routes/class-search');
+const seedClasses = require('./seed');
 
 
 app.use(cors({

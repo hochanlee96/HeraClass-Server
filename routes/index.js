@@ -1,7 +1,8 @@
 var express = require("express"),
     router = express.Router(),
     passport = require("passport"),
-    User = require("../models/user");
+    User = require("../models/user"),
+    middleware = require('../middleware');
 
 
 //Routes
@@ -33,6 +34,29 @@ router.post("/register", function (req, res) {
         });
     });
 });
+
+router.put('/update-favorites', middleware.isLoggedIn, function (req, res) {
+    console.log(req.body)
+    if (req.body.add) {
+        User.findByIdAndUpdate(req.user._id, { $push: { favorites: req.body.classId } }, { safe: true, upsert: true, new: true }, function (err, foundUser) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(foundUser);
+                res.status(200).send();
+            }
+        })
+    } else {
+        User.findByIdAndUpdate(req.user._id, { $pull: { favorites: req.body.classId } }, { safe: true, upsert: true, new: true }, function (err, foundUser) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log(foundUser);
+                res.status(200).send();
+            }
+        })
+    }
+})
 
 router.post('/login', passport.authenticate('local'), function (req, res) {
     res.redirect('/user-data')
