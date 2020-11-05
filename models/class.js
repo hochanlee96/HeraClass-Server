@@ -16,6 +16,13 @@ var classSchema = new mongoose.Schema({
     },
     followers: [
         { type: mongoose.Schema.Types.String }
+    ],
+    postedBy: String,
+    reviews: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Review"
+        }
     ]
 });
 

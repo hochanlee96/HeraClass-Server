@@ -1,8 +1,8 @@
 var express = require("express"),
     router = express.Router(),
     passport = require("passport"),
-    User = require("../models/user"),
-    middleware = require('../middleware');
+    User = require("../../models/user"),
+    middleware = require('../../middleware');
 
 
 //Routes
@@ -22,20 +22,21 @@ var express = require("express"),
 //     })
 // });
 router.post("/register", function (req, res) {
+    console.log('registering...')
     User.register(new User({ email: req.body.email, username: req.body.username }), req.body.password, function (err, user) {
         if (err) {
             console.log(err);
             return res.json({ error: err.message });
         }
-        passport.authenticate("local")(req, res, function () {
+        passport.authenticate("user-local")(req, res, function () {
             console.log(req.isAuthenticated());
             console.log(req.user);
-            res.redirect('/user-data');
+            res.redirect('/user/auth/user-data');
         });
     });
 });
 
-router.put('/update-favorites', middleware.isLoggedIn, function (req, res) {
+router.put('/update-favorites', middleware.isLoggedInAsUser, function (req, res) {
     console.log(req.body)
     if (req.body.add) {
         User.findByIdAndUpdate(req.user._id, { $push: { favorites: req.body.classId } }, { safe: true, upsert: true, new: true }, function (err, foundUser) {
@@ -58,8 +59,8 @@ router.put('/update-favorites', middleware.isLoggedIn, function (req, res) {
     }
 })
 
-router.post('/login', passport.authenticate('local'), function (req, res) {
-    res.redirect('/user-data')
+router.post('/login', passport.authenticate('user-local'), function (req, res) {
+    res.redirect('/user/auth/user-data')
 })
 
 // router.post('/login', function (req, res, next) {
@@ -85,27 +86,31 @@ router.post('/login', passport.authenticate('local'), function (req, res) {
 //     })(req, res, next);
 // });
 
-router.get('/user-data', function (req, res) {
-    var user_info = null;
-    // console.log('req_user', req.user)
-    if (!req.user) {
-        console.log('session expired')
-    } else {
-        console.log('req.user one?', req.user)
-        user_info = {}
-        user_info.username = req.user.username;
-        user_info.email = req.user.email;
-        user_info.favorites = [...req.user.favorites];
-        user_info.expires = req.session.cookie.expires;
-        console.log('user!!', user_info)
-    }
+router.put('/edit', middleware.isLoggedInAsUser, function (req, res) {
+    console.log('put request')
+    User.findOneAndUpdate({ "email": req.user.email }, { "username": req.body.username }, function (err) {
+        if (err) {
+            console.log(err)
+        } else {
+            res.status(200).send();
+        }
+    })
+})
+
+router.get('/user-data', middleware.isLoggedInAsUser, function (req, res) {
+    const user_info = {}
+    user_info.username = req.user.username;
+    user_info.email = req.user.email;
+    user_info.favorites = [...req.user.favorites];
+    user_info.expires = req.session.cookie.expires;
+    console.log('user :', user_info)
     return res.json(user_info);
 })
 
 
 router.get("/logout", function (req, res) {
     req.logout();
-    res.json('logged out');
+    return res.sendStatus(200);
 });
 
 
