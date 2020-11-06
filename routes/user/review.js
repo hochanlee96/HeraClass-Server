@@ -20,7 +20,7 @@ router.post("/:classId", middleware.isLoggedInAsUser, function (req, res) {
                     foundClass.reviews.push(createdReview);
                     foundClass.save();
                     console.log('review successfully saved')
-                    res.send({ status: 200 });
+                    res.send(createdReview);
                 };
             });
         }
@@ -37,6 +37,18 @@ router.post("/:classId", middleware.isLoggedInAsUser, function (req, res) {
 //     });
 // });
 
+router.put("/:reviewId", middleware.checkReviewOwnership, function (req, res) {
+    Review.findByIdAndUpdate(req.params.reviewId, { ...req.body }, function (err, updatedReview) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log('update successful')
+            res.send(updatedReview);
+        }
+
+    })
+})
+
 router.delete("/:classId/:reviewId", middleware.checkReviewOwnership, function (req, res) {
     console.log('params', req.params);
     //merge params -> get classId -> pop from reviews list
@@ -52,7 +64,8 @@ router.delete("/:classId/:reviewId", middleware.checkReviewOwnership, function (
             }
         })
     })
-
 });
+
+
 
 module.exports = router;
