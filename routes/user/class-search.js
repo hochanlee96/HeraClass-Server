@@ -3,6 +3,7 @@ const router = express.Router();
 
 const Class = require('../../models/class');
 const middleware = require('../../middleware');
+const User = require('../../models/user');
 
 
 router.get("/", function (req, res) {
@@ -11,6 +12,17 @@ router.get("/", function (req, res) {
             console.log(err)
         } else {
             res.send(searchedClasses);
+        }
+    })
+
+})
+
+router.get("/favorite", middleware.isLoggedInAsUser, function (req, res) {
+    Class.find({ '_id': { $in: req.user.favorites } }, (err, favoriteClasses) => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.send(favoriteClasses);
         }
     })
 

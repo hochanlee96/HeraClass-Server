@@ -11,7 +11,8 @@ var UserSchema = new mongoose.Schema({
             // ref: "Comment"
             type: mongoose.Schema.Types.ObjectId
         }
-    ]
+    ],
+    googleId: String,
 });
 
 UserSchema.plugin(passportLocalMongoose, { usernameField: 'email', passwordField: 'password' });

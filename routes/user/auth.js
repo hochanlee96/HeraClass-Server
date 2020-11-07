@@ -25,12 +25,11 @@ router.post("/register", function (req, res) {
     console.log('registering...')
     User.register(new User({ email: req.body.email, username: req.body.username }), req.body.password, function (err, user) {
         if (err) {
-            console.log(err);
-            return res.json({ error: err.message });
+            if (err.message === "A user with the given username is already registered") {
+                return res.json({ error: err.message });
+            }
         }
-        passport.authenticate("user-local")(req, res, function () {
-            console.log(req.isAuthenticated());
-            console.log(req.user);
+        passport.authenticate("user-local", { failureRedirect: '/user/auth/loginFail' })(req, res, function () {
             res.redirect('/user/auth/user-data');
         });
     });
@@ -59,8 +58,22 @@ router.put('/update-favorites', middleware.isLoggedInAsUser, function (req, res)
     }
 })
 
-router.post('/login', passport.authenticate('user-local'), function (req, res) {
+router.post('/login', passport.authenticate('user-local', { failureRedirect: '/user/auth/loginFail' }), function (req, res) {
     res.redirect('/user/auth/user-data')
+})
+
+router.get('/google',
+    passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login', 'email'] }));
+
+router.get('/google/callback',
+    passport.authenticate('google', { failureRedirect: 'user/auth/loginFail' }),
+    function (req, res) {
+        console.log(req.get('origin'))
+        return res.redirect('http://localhost:3000')
+    });
+
+router.get('/loginFail', function (req, res) {
+    return res.send({ error: "login fail" })
 })
 
 // router.post('/login', function (req, res, next) {
@@ -92,7 +105,7 @@ router.put('/edit', middleware.isLoggedInAsUser, function (req, res) {
         if (err) {
             console.log(err)
         } else {
-            res.status(200).send();
+            res.status(200).send;
         }
     })
 })

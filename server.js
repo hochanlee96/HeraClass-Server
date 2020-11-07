@@ -4,6 +4,7 @@ var express = require('express'),
     mongoose = require("mongoose"),
     passport = require("passport"),
     LocalStrategy = require("passport-local").Strategy,
+    GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
     // classSaver = require('./classSaver'),
     User = require("./models/user"),
     Partner = require("./models/partner");
@@ -50,7 +51,8 @@ app.use(cors({
             return callback(new Error(msg), false);
         }
         return callback(null, true);
-    }
+    },
+
 }));
 // app.use(cors({
 //     origin: "http://localhost:3000", // server의 url이 아닌, 요청하는 client의 url
@@ -73,6 +75,49 @@ app.use(passport.session());
 // passport.use(Partner.createStrategy());
 passport.use('user-local', User.createStrategy());
 passport.use('partner-local', Partner.createStrategy());
+passport.use(new GoogleStrategy({
+    clientID: '350520742740-9hml57j4kd3vv74vja6fbp40vj1q7qho.apps.googleusercontent.com',
+    clientSecret: '250cWXdXfo9rAE4GKuiDw5DB',
+    callbackURL: "http://localhost:3001/user/auth/google/callback"
+},
+    function (accessToken, refreshToken, profile, done) {
+        const userEmail = profile.emails[0].value;
+        const username = profile.displayName;
+        const googleId = profile.id;
+        User.findOne({ 'email': userEmail }, function (err, user) {
+            if (err) {
+                console.log(err)
+            } else if (user) {
+                //if google id가 있으면
+                if (user.googleId) {
+                    done(null, user);
+                } else {
+                    User.findOneAndUpdate({ 'email': userEmail }, { googleId: googleId }, function (err, updatedUser) {
+                        if (err) {
+                            console.log('error while updating user', err)
+                        } else {
+                            done(null, updatedUser);
+                        }
+                    })
+                }
+                //google id가 없으면
+                //update user google id field
+            } else {
+                User.create({ email: userEmail, username, googleId }, function (err, user) {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        done(null, user);
+                    }
+                })
+            }
+        })
+        // User.findOrCreate({ googleId: profile.id }, function (err, user) {
+        //     return done(err, user);
+        // });
+    }
+));
+
 passport.serializeUser(function (user, done) {
     console.log('user:', user);
     let isPartner = false;
@@ -84,7 +129,7 @@ passport.serializeUser(function (user, done) {
 passport.deserializeUser(function (userObj, done) {
     console.log('deserialize')
     const { id } = userObj
-    console.log(userObj.isPartner)
+    console.log('is Partner? ', userObj.isPartner)
     if (userObj.isPartner) {
         Partner.findById(id, function (err, user) {
             console.log('user!!: ', user)
