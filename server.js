@@ -3,15 +3,17 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     mongoose = require("mongoose"),
     passport = require("passport"),
+    flash = require('connect-flash'),
     LocalStrategy = require("passport-local").Strategy,
     GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
-    // classSaver = require('./classSaver'),
+    FacebookStrategy = require('passport-facebook').Strategy,
+    dataInitializer = require('./classSaver'),
     User = require("./models/user"),
     Partner = require("./models/partner");
 
 mongoose.connect("mongodb://localhost:27017/heraclass", { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
 // mongoose.connect("mongodb+srv://hochan:lee@cluster0.v5xbw.mongodb.net/yelp_camp?retryWrites=true&w=majority");
-// classSaver();
+dataInitializer();
 const port = process.env.PORT || 3001;
 const cors = require('cors');
 
@@ -61,6 +63,7 @@ app.use(cors({
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(flash());
 
 app.use(require("express-session")({
     secret: "HERA_CLASS",
@@ -78,7 +81,9 @@ passport.use('partner-local', Partner.createStrategy());
 passport.use(new GoogleStrategy({
     clientID: '350520742740-9hml57j4kd3vv74vja6fbp40vj1q7qho.apps.googleusercontent.com',
     clientSecret: '250cWXdXfo9rAE4GKuiDw5DB',
-    callbackURL: "http://localhost:3001/user/auth/google/callback"
+    callbackURL: "http://localhost:3001/user/auth/google/callback",
+    profileFields: ['id', 'displayName', 'email']
+
 },
     function (accessToken, refreshToken, profile, done) {
         const userEmail = profile.emails[0].value;
@@ -112,9 +117,48 @@ passport.use(new GoogleStrategy({
                 })
             }
         })
-        // User.findOrCreate({ googleId: profile.id }, function (err, user) {
-        //     return done(err, user);
-        // });
+    }
+));
+
+passport.use(new FacebookStrategy({
+    clientID: '465324197776374',
+    clientSecret: '5c6913ddbf0ee3320822916099cc8c4e',
+    callbackURL: "http://localhost:3001/user/auth/facebook/callback",
+    profileFields: ['id', 'emails', 'displayName']
+},
+    function (accessToken, refreshToken, profile, done) {
+        console.log(profile);
+        const userEmail = profile.emails[0].value;
+        const username = profile.displayName;
+        const facebookId = profile.id;
+        User.findOne({ 'email': userEmail }, function (err, user) {
+            if (err) {
+                console.log(err)
+            } else if (user) {
+                //if google id가 있으면
+                if (user.facebookId) {
+                    done(null, user);
+                } else {
+                    User.findOneAndUpdate({ 'email': userEmail }, { facebookId: facebookId }, function (err, updatedUser) {
+                        if (err) {
+                            console.log('error while updating user', err)
+                        } else {
+                            done(null, updatedUser);
+                        }
+                    })
+                }
+                //facebook id가 없으면
+                //update user facebook id field
+            } else {
+                User.create({ email: userEmail, username, facebookId }, function (err, user) {
+                    if (err) {
+                        console.log(err)
+                    } else {
+                        done(null, user);
+                    }
+                })
+            }
+        })
     }
 ));
 

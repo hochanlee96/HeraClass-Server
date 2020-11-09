@@ -23,13 +23,14 @@ var express = require("express"),
 // });
 router.post("/register", function (req, res) {
     console.log('registering...')
+    console.log('req.body', req.body)
     User.register(new User({ email: req.body.email, username: req.body.username }), req.body.password, function (err, user) {
         if (err) {
             if (err.message === "A user with the given username is already registered") {
                 return res.json({ error: err.message });
             }
         }
-        passport.authenticate("user-local", { failureRedirect: '/user/auth/loginFail' })(req, res, function () {
+        passport.authenticate("user-local", { failureRedirect: '/user/auth/login-fail', failureFlash: true })(req, res, function () {
             res.redirect('/user/auth/user-data');
         });
     });
@@ -58,46 +59,34 @@ router.put('/update-favorites', middleware.isLoggedInAsUser, function (req, res)
     }
 })
 
-router.post('/login', passport.authenticate('user-local', { failureRedirect: '/user/auth/loginFail' }), function (req, res) {
+router.post('/login', passport.authenticate('user-local', { failureRedirect: '/user/auth/login-fail', failureFlash: true }), function (req, res) {
     res.redirect('/user/auth/user-data')
 })
 
 router.get('/google',
     passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login', 'email'] }));
 
+router.get('/facebook',
+    passport.authenticate('facebook', { scope: 'email' }));
+
 router.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: 'user/auth/loginFail' }),
+    passport.authenticate('google', { failureRedirect: 'user/auth/login-fail' }),
     function (req, res) {
         console.log(req.get('origin'))
         return res.redirect('http://localhost:3000')
     });
 
-router.get('/loginFail', function (req, res) {
-    return res.send({ error: "login fail" })
+router.get('/facebook/callback',
+    passport.authenticate('facebook', { failureRedirect: 'user/auth/login-fail' }),
+    function (req, res) {
+        console.log(req.get('origin'))
+        return res.redirect('http://localhost:3000')
+    });
+
+router.get('/login-fail', function (req, res) {
+    const errorMessage = req.flash('error')[0]
+    return res.send({ error: errorMessage })
 })
-
-// router.post('/login', function (req, res, next) {
-//     passport.authenticate('local', function (err, user, info) {
-//         if (err) { return res.send({ 'error': err.message }) }
-//         if (user) { // 로그인 성공
-//             // console.log(user);
-//             // customCallback 사용시 req.logIn()메서드 필수
-//             console.log('session 1', req.session)
-//             req.logIn(user, function (err) {
-//                 console.log('user', user)
-//                 console.log('session 2', req.session)
-//                 if (err) { return next(err); }
-//                 console.log('logged in ', req.isAuthenticated());
-//                 // req.logout()
-//                 // console.log('logged out', req.isAuthenticated());
-//                 return res.redirect('/');
-//             });
-
-//         } else {	// 로그인 실패
-//             res.send({ 'error': 'login fail' });
-//         }
-//     })(req, res, next);
-// });
 
 router.put('/edit', middleware.isLoggedInAsUser, function (req, res) {
     console.log('put request')

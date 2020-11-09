@@ -61,7 +61,7 @@ router.delete("/:classId", middleware.checkClassOwnership, function (req, res) {
         if (err) {
             console.log(err);
         } else {
-            res.status(200).send();
+            res.send({ status: 200 });
         }
     })
 })
