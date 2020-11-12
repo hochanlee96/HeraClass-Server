@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 
 const Class = require('../../models/class');
 const middleware = require('../../middleware');

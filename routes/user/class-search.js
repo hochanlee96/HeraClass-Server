@@ -4,13 +4,17 @@ const router = express.Router();
 const Class = require('../../models/class');
 const middleware = require('../../middleware');
 const User = require('../../models/user');
+const { populate } = require('../../models/class');
 
 
-router.get("/", function (req, res) {
-    Class.find({}, (err, searchedClasses) => {
+router.get("/search/:maxX&:minX&:maxY&:minY", function (req, res) {
+    const boundary = req.params;
+    console.log(boundary)
+    Class.find({ "coordinates.latitude": { $lte: boundary.maxX, $gte: boundary.minX }, "coordinates.longitude": { $lte: boundary.maxY, $gte: boundary.minY } }).populate("reviews", 'rating').exec((err, searchedClasses) => {
         if (err) {
             console.log(err)
         } else {
+            console.log(searchedClasses)
             res.send(searchedClasses);
         }
     })
@@ -18,7 +22,7 @@ router.get("/", function (req, res) {
 })
 
 router.get("/favorite", middleware.isLoggedInAsUser, function (req, res) {
-    Class.find({ '_id': { $in: req.user.favorites } }, (err, favoriteClasses) => {
+    Class.find({ '_id': { $in: req.user.favorites } }).populate("reviews", 'rating').exec((err, favoriteClasses) => {
         if (err) {
             console.log(err);
         } else {
@@ -30,11 +34,10 @@ router.get("/favorite", middleware.isLoggedInAsUser, function (req, res) {
 
 router.get("/:classId", function (req, res) {
     //get params
-    Class.findById(req.params.classId).populate('reviews').exec((err, searchedClass) => {
+    Class.findById(req.params.classId).populate("reviews").exec((err, searchedClass) => {
         if (err) {
             console.log(err);
         } else {
-            console.log(searchedClass);
             res.send(searchedClass);
         }
     })

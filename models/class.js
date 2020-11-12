@@ -4,9 +4,10 @@ var classSchema = new mongoose.Schema({
     title: String,
     imageUrl: String,
     coordinates: {
-        latitude: String,
-        longitude: String
+        latitude: Number,
+        longitude: Number
     },
+    bigAddress: String,
     address: String,
     category: [
         { type: mongoose.Schema.Types.String }
@@ -20,8 +21,11 @@ var classSchema = new mongoose.Schema({
     postedBy: String,
     reviews: [
         {
+            // id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Review"
+            // },
+            // rating: Number
         }
     ]
 });

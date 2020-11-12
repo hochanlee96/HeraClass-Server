@@ -23,6 +23,7 @@ const userClassRoutes = require('./routes/user/class-search');
 const reviewRoutes = require('./routes/user/review');
 const partnerAuthRoutes = require('./routes/partner/auth');
 const partnerClassRoutes = require('./routes/partner/class-search');
+const mapRoutes = require('./routes/map');
 
 const { Strategy } = require('passport');
 
@@ -197,6 +198,7 @@ app.use('/user/class-list', userClassRoutes);
 app.use('/user/review', reviewRoutes);
 app.use('/partners/auth', partnerAuthRoutes);
 app.use('/partners/classes', partnerClassRoutes);
+app.use('/map', mapRoutes);
 
 
 app.listen(port, () => {
