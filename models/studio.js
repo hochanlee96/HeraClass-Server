@@ -30,6 +30,6 @@ var StudioSchema = new mongoose.Schema({
     ]
 });
 
-StudioSchema.index({ title: 'text', bigAddress: 'text', category: 'text' })
+// StudioSchema.index({ title: 'text', bigAddress: 'text', category: 'text' })
 
 module.exports = mongoose.model("Studio", StudioSchema);
