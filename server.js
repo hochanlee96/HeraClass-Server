@@ -11,7 +11,7 @@ var express = require('express'),
     User = require("./models/user"),
     Partner = require("./models/partner");
 
-mongoose.connect("mongodb://localhost:27017/heraclass", { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
+mongoose.connect("mongodb://localhost:27017/heraclass", { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true });
 // mongoose.connect("mongodb+srv://hochan:lee@cluster0.v5xbw.mongodb.net/yelp_camp?retryWrites=true&w=majority");
 dataInitializer();
 const port = process.env.PORT || 3001;

@@ -6,7 +6,18 @@ const middleware = require('../../middleware');
 const User = require('../../models/user');
 const { populate } = require('../../models/class');
 
-
+router.get("/search/keyword/:keyword", function (req, res) {
+    console.log(req.params.keyword)
+    const keyword = req.params.keyword;
+    Class.find({ $text: { $search: keyword } }, function (err, foundClasses) {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log('length :', foundClasses.length);
+            res.send(foundClasses);
+        }
+    })
+})
 router.get("/search/:maxX&:minX&:maxY&:minY", function (req, res) {
     const boundary = req.params;
     console.log(boundary)

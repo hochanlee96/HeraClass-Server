@@ -30,4 +30,6 @@ var classSchema = new mongoose.Schema({
     ]
 });
 
+classSchema.index({ title: 'text', bigAddress: 'text', category: 'text' })
+
 module.exports = mongoose.model("Class", classSchema);

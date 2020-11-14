@@ -7,9 +7,8 @@ var UserSchema = new mongoose.Schema({
     password: String,
     favorites: [
         {
-            // type: mongoose.Schema.Types.ObjectId,
-            // ref: "Comment"
-            type: mongoose.Schema.Types.ObjectId
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Class"
         }
     ],
     googleId: String,
