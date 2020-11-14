@@ -1,23 +1,23 @@
 var seedData = require('./seed'),
-    Class = require('./models/class'),
+    Studio = require('./models/studio'),
     User = require('./models/user'),
     Partner = require('./models/partner'),
     Review = require('./models/review'),
     mongoose = require("mongoose");
 
 function dropCollections() {
-    Class.collection.drop();
+    Studio.collection.drop();
     User.collection.drop();
     Partner.collection.drop();
     Review.collection.drop();
 }
-function saveClasses() {
+function saveStudios() {
     seedData.studios.forEach(function (studio) {
-        Class.create(studio, function (err, savedStudio) {
+        Studio.create(studio, function (err, savedStudio) {
             if (err) {
                 console.log(err)
             } else {
-                console.log("added class : ", savedStudio._id);
+                console.log("added studio : ", savedStudio._id);
                 Review.create({ author: { email: 'test@test.com', username: 'tester' }, review: 'first review', rating: '5', date: new Date() }, function (err, createdReview) {
                     if (err) {
                         console.log(err);
@@ -59,15 +59,8 @@ function savePartners() {
 }
 
 function dataInitializer() {
-    // mongoose.connection.db.dropCollection('classes', function (err, result) {
-    //     if (err) {
-    //         console.log(err)
-    //     } else {
-    //         console.log(result);
-    //     }
-    // })
     dropCollections();
-    saveClasses();
+    saveStudios();
     savePartners();
     saveUsers();
 }

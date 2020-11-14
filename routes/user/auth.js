@@ -39,7 +39,7 @@ router.post("/register", function (req, res) {
 router.put('/update-favorites', middleware.isLoggedInAsUser, function (req, res) {
     console.log(req.body)
     if (req.body.add) {
-        User.findByIdAndUpdate(req.user._id, { $push: { favorites: req.body.classId } }, { safe: true, upsert: true, new: true }, function (err, foundUser) {
+        User.findByIdAndUpdate(req.user._id, { $push: { favorites: req.body.studioId } }, { safe: true, upsert: true, new: true }, function (err, foundUser) {
             if (err) {
                 console.log(err);
             } else {
@@ -48,7 +48,7 @@ router.put('/update-favorites', middleware.isLoggedInAsUser, function (req, res)
             }
         })
     } else {
-        User.findByIdAndUpdate(req.user._id, { $pull: { favorites: req.body.classId } }, { safe: true, upsert: true, new: true }, function (err, foundUser) {
+        User.findByIdAndUpdate(req.user._id, { $pull: { favorites: req.body.studioId } }, { safe: true, upsert: true, new: true }, function (err, foundUser) {
             if (err) {
                 console.log(err);
             } else {

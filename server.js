@@ -7,7 +7,7 @@ var express = require('express'),
     LocalStrategy = require("passport-local").Strategy,
     GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
     FacebookStrategy = require('passport-facebook').Strategy,
-    dataInitializer = require('./classSaver'),
+    dataInitializer = require('./seedDataSaver'),
     User = require("./models/user"),
     Partner = require("./models/partner");
 
@@ -19,10 +19,10 @@ const cors = require('cors');
 
 
 const userAuthRoutes = require('./routes/user/auth');
-const userClassRoutes = require('./routes/user/class-search');
+const userStudioRoutes = require('./routes/user/studio-search');
 const reviewRoutes = require('./routes/user/review');
 const partnerAuthRoutes = require('./routes/partner/auth');
-const partnerClassRoutes = require('./routes/partner/class-search');
+const partnerStudioRoutes = require('./routes/partner/studio-search');
 const mapRoutes = require('./routes/map');
 
 const { Strategy } = require('passport');
@@ -194,10 +194,10 @@ passport.deserializeUser(function (userObj, done) {
 // passport.deserializeUser(Partner.deserializeUser());
 
 app.use('/user/auth', userAuthRoutes);
-app.use('/user/class-list', userClassRoutes);
+app.use('/user/studio-search', userStudioRoutes);
 app.use('/user/review', reviewRoutes);
 app.use('/partners/auth', partnerAuthRoutes);
-app.use('/partners/classes', partnerClassRoutes);
+app.use('/partners/studios', partnerStudioRoutes);
 app.use('/map', mapRoutes);
 
 

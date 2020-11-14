@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
-const Class = require('../../models/class');
+const Studio = require('../../models/studio');
 const Review = require('../../models/review');
 const middleware = require('../../middleware');
 const { Mongoose } = require("mongoose");
 
 //comments routes
 
-router.post("/:classId", middleware.isLoggedInAsUser, function (req, res) {
-    Class.findById(req.params.classId, function (err, foundClass) {
+router.post("/:studioId", middleware.isLoggedInAsUser, function (req, res) {
+    Studio.findById(req.params.studioId, function (err, foundStudio) {
         if (err) {
             console.log(err);
         } else {
@@ -17,8 +17,8 @@ router.post("/:classId", middleware.isLoggedInAsUser, function (req, res) {
                     console.log(err);
                 } else {
 
-                    foundClass.reviews.push(createdReview);
-                    foundClass.save();
+                    foundStudio.reviews.push(createdReview);
+                    foundStudio.save();
                     console.log('review successfully saved')
                     res.send(createdReview);
                 };
@@ -49,10 +49,10 @@ router.put("/:reviewId", middleware.checkReviewOwnership, function (req, res) {
     })
 })
 
-router.delete("/:classId/:reviewId", middleware.checkReviewOwnership, function (req, res) {
+router.delete("/:studioId/:reviewId", middleware.checkReviewOwnership, function (req, res) {
     console.log('params', req.params);
     //merge params -> get classId -> pop from reviews list
-    Class.findByIdAndUpdate(req.params.classId, { $pull: { reviews: req.params.reviewId } }, { safe: true, upsert: true, new: true }, function (err, foundClass) {
+    Studio.findByIdAndUpdate(req.params.studioId, { $pull: { reviews: req.params.reviewId } }, { safe: true, upsert: true, new: true }, function (err, foundStudio) {
         if (err) {
             console.log(err)
         }

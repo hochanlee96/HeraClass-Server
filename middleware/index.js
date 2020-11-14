@@ -1,4 +1,4 @@
-const Class = require('../models/class');
+const Studio = require('../models/studio');
 const Review = require('../models/review');
 
 var middlewareObj = {};
@@ -19,13 +19,13 @@ middlewareObj.isLoggedInAsPartner = function (req, res, next) {
     res.send({ error: 'not signed in' });
 };
 
-middlewareObj.checkClassOwnership = function (req, res, next) {
+middlewareObj.checkStudioOwnership = function (req, res, next) {
     if (req.isAuthenticated()) {
-        Class.findById(req.params.classId, function (err, foundClass) {
+        Studio.findById(req.params.studioId, function (err, foundStudio) {
             if (err) {
                 res.send({ error: err });
             } else {
-                if (foundClass.postedBy === req.user.email) {
+                if (foundStudio.postedBy === req.user.email) {
                     next();
                 } else {
                     res.send({ error: "not permitted" });

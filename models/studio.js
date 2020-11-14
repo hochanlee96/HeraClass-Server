@@ -1,6 +1,6 @@
 var mongoose = require("mongoose");
 
-var classSchema = new mongoose.Schema({
+var StudioSchema = new mongoose.Schema({
     title: String,
     imageUrl: String,
     coordinates: {
@@ -30,6 +30,6 @@ var classSchema = new mongoose.Schema({
     ]
 });
 
-classSchema.index({ title: 'text', bigAddress: 'text', category: 'text' })
+StudioSchema.index({ title: 'text', bigAddress: 'text', category: 'text' })
 
-module.exports = mongoose.model("Class", classSchema);
+module.exports = mongoose.model("Studio", StudioSchema);
