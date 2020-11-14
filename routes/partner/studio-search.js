@@ -44,12 +44,13 @@ router.get("/:studioId", middleware.isLoggedInAsPartner, function (req, res) {
 router.put("/:studioId", middleware.checkStudioOwnership, function (req, res) {
     //get params
     const studioId = req.params.studioId;
+    console.log('body', req.body);
     Studio.findByIdAndUpdate(studioId, req.body, (err, searchedStudio) => {
         if (err) {
             console.log(err);
         } else {
             console.log(searchedStudio);
-            res.status(200).send();
+            res.send({ status: 200 });
         }
     })
 })

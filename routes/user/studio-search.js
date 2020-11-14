@@ -9,12 +9,23 @@ const { populate } = require('../../models/studio');
 router.get("/search/keyword/:keyword", function (req, res) {
     console.log(req.params.keyword)
     const keyword = req.params.keyword;
-    Studio.find({ $text: { $search: keyword } }, function (err, foundStudios) {
+    // Studio.find({ $text: { $search: keyword } }, function (err, foundStudios) {
+    //     if (err) {
+    //         console.log(err)
+    //     } else {
+    //         console.log('length :', foundStudios.length);
+    //         res.send(foundStudios);
+    //     }
+    // })
+    Studio.find({
+        $or: [{ title: { $regex: keyword, $options: "i" } }, { bigAddress: { $regex: keyword, $options: "i" } }, { category: { $regex: keyword, $options: "i" } }]
+    }, function (err, searchedStudios) {
         if (err) {
             console.log(err)
         } else {
-            console.log('length :', foundStudios.length);
-            res.send(foundStudios);
+            console.log(searchedStudios)
+            console.log(searchedStudios.length);
+            res.send(searchedStudios)
         }
     })
 })
