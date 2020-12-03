@@ -27,6 +27,12 @@ var StudioSchema = new mongoose.Schema({
             // },
             // rating: Number
         }
+    ],
+    events: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Event"
+        }
     ]
 });
 

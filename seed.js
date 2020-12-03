@@ -23,12 +23,14 @@ var seedStudios = [
     { title: '테스트 데이터 15', imageUrl: 'https://s3.ap-northeast-2.amazonaws.com/stone-i-dagym-centers/images/gyms/162b51693ac38688de/4K6ujJ9HCeiDjkD6CKoT5MwMqLUat87fBYoB9kCdwgQo.jpg', bigAddress: '경기 고양시 덕양구 향동동', coordinates: { latitude: "37.6052658", longitude: "126.8957347" }, address: "경기도 고양시 덕양구 향동동 71", category: ["크로스핏"], details: { tel: "0504-3172-6818" }, followers: [], postedBy: 'partner@test.com' },
 ];
 
-var seedUsers = [{ email: 'test@test.com', username: 'tester', password: 'aaaaaa' }, { email: 'test2@test.com', username: 'tester2', password: 'aaaaaa' }]
+var seedUsers = [{ email: 'test@test.com', username: 'tester', password: 'aaaaaa', verified: true }, { email: 'test2@test.com', username: 'tester2', password: 'aaaaaa' }]
 var seedPartners = [{ email: 'partner@test.com', username: 'partner', password: 'aaaaaa' }, { email: 'partner2@test.com', username: 'partner2', password: 'aaaaaa' }]
+var seedEvent = { title: '테스트 이벤트', category: 'test category', duration: '120', trainer: 'test trainer', capacity: '10', difficulty: 'Beginner' }
 
 seedData.studios = seedStudios;
 seedData.users = seedUsers;
 seedData.partners = seedPartners;
+seedData.event = seedEvent;
 
 
 module.exports = seedData;

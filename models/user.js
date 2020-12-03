@@ -3,12 +3,19 @@ passportLocalMongoose = require("passport-local-mongoose");
 
 var UserSchema = new mongoose.Schema({
     email: String,
+    verified: Boolean,
     username: String,
     password: String,
     favorites: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Studio"
+        }
+    ],
+    events: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Event"
         }
     ],
     googleId: String,

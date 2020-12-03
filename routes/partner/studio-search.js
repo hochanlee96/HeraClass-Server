@@ -28,7 +28,7 @@ router.get("/:studioId", middleware.isLoggedInAsPartner, function (req, res) {
     //get params
     const studioId = req.params.studioId;
     console.log('entered route')
-    Studio.findById(studioId, (err, searchedStudio) => {
+    Studio.findById(studioId).populate("events").exec((err, searchedStudio) => {
         if (err) {
             console.log(err);
         } else {

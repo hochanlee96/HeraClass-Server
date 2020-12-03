@@ -3,6 +3,7 @@ var seedData = require('./seed'),
     User = require('./models/user'),
     Partner = require('./models/partner'),
     Review = require('./models/review'),
+    Event = require('./models/event'),
     mongoose = require("mongoose");
 
 function dropCollections() {
@@ -10,6 +11,7 @@ function dropCollections() {
     User.collection.drop();
     Partner.collection.drop();
     Review.collection.drop();
+    Event.collection.drop();
 }
 function saveStudios() {
     seedData.studios.forEach(function (studio) {
@@ -25,6 +27,15 @@ function saveStudios() {
                         savedStudio.reviews.push(createdReview);
                         savedStudio.save();
                         console.log('review successfully saved')
+                        Event.create({ ...seedData.event, studioId: savedStudio._id, date: new Date(new Date().getTime() + 720000) }, function (err, createdEvent) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                savedStudio.events.push(createdEvent);
+                                savedStudio.save();
+                                console.log('event successfully saved')
+                            }
+                        })
                     };
                 });
             }
@@ -34,7 +45,7 @@ function saveStudios() {
 
 function saveUsers() {
     seedData.users.forEach(function (user) {
-        User.register({ email: user.email, username: user.username }, user.password, function (err, createdUser) {
+        User.register({ email: user.email, username: user.username, verified: user.verified }, user.password, function (err, createdUser) {
             if (err) {
                 console.log(err)
             } else {

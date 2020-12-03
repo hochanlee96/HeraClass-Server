@@ -24,6 +24,7 @@ const reviewRoutes = require('./routes/user/review');
 const partnerAuthRoutes = require('./routes/partner/auth');
 const partnerStudioRoutes = require('./routes/partner/studio-search');
 const mapRoutes = require('./routes/map');
+const eventRoutes = require('./routes/event');
 
 const { Strategy } = require('passport');
 
@@ -199,6 +200,7 @@ app.use('/user/review', reviewRoutes);
 app.use('/partners/auth', partnerAuthRoutes);
 app.use('/partners/studios', partnerStudioRoutes);
 app.use('/map', mapRoutes);
+app.use('/event', eventRoutes);
 
 
 app.listen(port, () => {

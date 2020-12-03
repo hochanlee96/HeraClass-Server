@@ -2,7 +2,9 @@ var express = require("express"),
     router = express.Router(),
     passport = require("passport"),
     User = require("../../models/user"),
-    middleware = require('../../middleware');
+    middleware = require('../../middleware'),
+    transporter = require('../../nodemailer'),
+    randomstring = require("randomstring");
 
 
 //Routes
@@ -35,6 +37,39 @@ router.post("/register", function (req, res) {
         });
     });
 });
+
+router.get('/verify', middleware.isLoggedInAsUser, function (req, res) {
+    const randomString = randomstring.generate(30);
+    req.session.verifyString = randomString;
+    const verificationUrl = `http://localhost:3001/user/auth/verify/${randomString}`
+    let mailOptions = {
+        from: 'heraclass.tester@gmail.com',
+        // to: req.user.email,
+        to: 'j65hcl@gmail.com',
+        subject: 'Testing and testing',
+        html: `<p>Verify Your Email!</p><a href=${verificationUrl}>Click Here</a>`
+    }
+    transporter.sendMail(mailOptions, function (err, data) {
+        if (err) {
+            console.log(err)
+        } else {
+            console.log('email sent')
+        }
+    })
+    res.send({ message: 'email sent' })
+})
+
+router.get('/verify/:verificationstring', middleware.isLoggedInAsUser, function (req, res) {
+    if (req.session.verifyString === req.params.verificationstring) {
+        User.findByIdAndUpdate(req.user._id, { verified: true }, (err, user) => {
+            delete req.session.verifyString;
+            res.redirect('http://localhost:3000/profile')
+        })
+    } else {
+        delete req.session.verifyString;
+        res.redirect('http://localhost:3000/profile')
+    }
+})
 
 router.put('/update-favorites', middleware.isLoggedInAsUser, function (req, res) {
     console.log(req.body)
@@ -70,7 +105,7 @@ router.get('/facebook',
     passport.authenticate('facebook', { scope: 'email' }));
 
 router.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: 'user/auth/login-fail' }),
+    passport.authenticate('google', { failureRedirect: '/user/auth/login-fail' }),
     function (req, res) {
         console.log(req.get('origin'))
         return res.redirect('http://localhost:3000')
@@ -103,9 +138,12 @@ router.get('/user-data', middleware.isLoggedInAsUser, function (req, res) {
     const user_info = {}
     user_info.username = req.user.username;
     user_info.email = req.user.email;
+    user_info.verified = req.user.verified;
     user_info.favorites = [...req.user.favorites];
+    user_info.events = [...req.user.events];
     user_info.expires = req.session.cookie.expires;
     console.log('user :', user_info)
+    console.log('session', req.user)
     return res.json(user_info);
 })
 
