@@ -7,25 +7,7 @@ var express = require("express"),
     randomstring = require("randomstring");
 
 
-//Routes
-// router.post("/register", function (req, res) {
-//     User.register(new User({ username: req.body.username, userId: req.body.userId, favorites: [] }), req.body.password, function (err, user) {
-//         if (err) {
-//             console.log(err);
-//             return res.send({ "error": err.message });
-//         }
-//         req.login(user, function (err) {
-//             if (err) {
-//                 res.send({ 'error': err.message })
-//             }
-//             console.log(req.session)
-//             return res.json(req.session)
-//         });
-//     })
-// });
 router.post("/register", function (req, res) {
-    console.log('registering...')
-    console.log('req.body', req.body)
     User.register(new User({ email: req.body.email, username: req.body.username }), req.body.password, function (err, user) {
         if (err) {
             if (err.message === "A user with the given username is already registered") {
@@ -39,34 +21,40 @@ router.post("/register", function (req, res) {
 });
 
 router.get('/verify', middleware.isLoggedInAsUser, function (req, res) {
-    const randomString = randomstring.generate(30);
-    req.session.verifyString = randomString;
-    const verificationUrl = `http://localhost:3001/user/auth/verify/${randomString}`
-    let mailOptions = {
-        from: 'heraclass.tester@gmail.com',
-        // to: req.user.email,
-        to: 'j65hcl@gmail.com',
-        subject: 'Testing and testing',
-        html: `<p>Verify Your Email!</p><a href=${verificationUrl}>Click Here</a>`
-    }
-    transporter.sendMail(mailOptions, function (err, data) {
+    const verificationString = randomstring.generate(30);
+
+    User.findByIdAndUpdate(req.user._id, { verificationString: verificationString, expires: new Date(new Date().getTime() + 60000 * 5) }, function (err, user) {
         if (err) {
-            console.log(err)
+            res.send({ error: 'error has occured' })
         } else {
-            console.log('email sent')
+            const verificationUrl = `http://localhost:3001/user/auth/verify/${verificationString}`
+            let mailOptions = {
+                from: 'heraclass.tester@gmail.com',
+                // to: req.user.email,
+                to: 'j65hcl@gmail.com',
+                subject: 'Testing and testing',
+                html: `<p>Verify Your Email!</p><a href=${verificationUrl}>Click Here</a>`
+            }
+            transporter.sendMail(mailOptions, function (err, data) {
+                if (err) {
+                    console.log(err)
+                } else {
+                    console.log('email sent')
+                    res.send({ message: 'email sent' })
+                }
+            })
         }
     })
-    res.send({ message: 'email sent' })
+
 })
 
 router.get('/verify/:verificationstring', middleware.isLoggedInAsUser, function (req, res) {
-    if (req.session.verifyString === req.params.verificationstring) {
+    if (req.user.verificationString === req.params.verificationstring && new Date < req.user.expires) {
         User.findByIdAndUpdate(req.user._id, { verified: true }, (err, user) => {
-            delete req.session.verifyString;
+            console.log('user?', user)
             res.redirect('http://localhost:3000/profile')
         })
     } else {
-        delete req.session.verifyString;
         res.redirect('http://localhost:3000/profile')
     }
 })
@@ -132,6 +120,14 @@ router.put('/edit', middleware.isLoggedInAsUser, function (req, res) {
             res.status(200).send;
         }
     })
+})
+
+router.get('/check-verification', middleware.isLoggedInAsUser, function (req, res) {
+    if (req.user.verified) {
+        res.json({ verified: true })
+    } else {
+        res.json({ verified: false })
+    }
 })
 
 router.get('/user-data', middleware.isLoggedInAsUser, function (req, res) {
