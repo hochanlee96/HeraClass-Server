@@ -31,17 +31,24 @@ const { populate } = require('../../models/studio');
 // })
 ///:maxX&:minX&:maxY&:minY
 router.get("/search", function (req, res) {
+    console.log(req);
     const queryString = req.query;
     const center = queryString.center.split(',')
-    const coordDistance = { '1': 0.013, '5': 0.045, '10': 0.09, '20': 0.9 }
+    const coordDistance = { '1': 0.013, '5': 0.055, '10': 0.09, '20': 0.9 }
     const boundary = {
         maxLat: Number(center[0]) + coordDistance[queryString.maxDistance],
         minLat: Number(center[0]) - coordDistance[queryString.maxDistance],
         maxLng: Number(center[1]) + coordDistance[queryString.maxDistance],
         minLng: Number(center[1]) - coordDistance[queryString.maxDistance],
     }
+    let amenities;
     const query = {};
     query.$and = [{ "coordinates.latitude": { $lte: boundary.maxLat, $gte: boundary.minLat }, "coordinates.longitude": { $lte: boundary.maxLng, $gte: boundary.minLng } }]
+    if (queryString.amenities) {
+        const amenities = queryString.amenities.split(',');
+        const amenitiesQuery = { "amenities": { $all: amenities } }
+        query.$and = [...query.$and, { ...amenitiesQuery }]
+    }
     if (queryString.keyword) {
         query.$and = [...query.$and, { $or: [{ title: { $regex: queryString.keyword, $options: "i" } }, { bigAddress: { $regex: queryString.keyword, $options: "i" } }, { category: { $regex: queryString.keyword, $options: "i" } }] }]
     }

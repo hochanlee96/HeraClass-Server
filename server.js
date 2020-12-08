@@ -25,6 +25,7 @@ const partnerAuthRoutes = require('./routes/partner/auth');
 const partnerStudioRoutes = require('./routes/partner/studio-search');
 const mapRoutes = require('./routes/map');
 const eventRoutes = require('./routes/event');
+const smsRoutes = require('./routes/sms');
 
 const { Strategy } = require('passport');
 
@@ -89,6 +90,7 @@ passport.use(new GoogleStrategy({
 },
     function (accessToken, refreshToken, profile, done) {
         const userEmail = profile.emails[0].value;
+        console.log(profile);
         const username = profile.displayName;
         const googleId = profile.id;
         User.findOne({ 'email': userEmail }, function (err, user) {
@@ -99,7 +101,7 @@ passport.use(new GoogleStrategy({
                 if (user.googleId) {
                     done(null, user);
                 } else {
-                    User.findOneAndUpdate({ 'email': userEmail }, { googleId: googleId }, function (err, updatedUser) {
+                    User.findOneAndUpdate({ 'email': userEmail }, { googleId: googleId, verified: true }, function (err, updatedUser) {
                         if (err) {
                             console.log('error while updating user', err)
                         } else {
@@ -110,7 +112,7 @@ passport.use(new GoogleStrategy({
                 //google id가 없으면
                 //update user google id field
             } else {
-                User.create({ email: userEmail, username, googleId }, function (err, user) {
+                User.create({ email: userEmail, username, googleId, verified: true }, function (err, user) {
                     if (err) {
                         console.log(err)
                     } else {
@@ -137,11 +139,11 @@ passport.use(new FacebookStrategy({
             if (err) {
                 console.log(err)
             } else if (user) {
-                //if google id가 있으면
+                //if facebook id가 있으면
                 if (user.facebookId) {
                     done(null, user);
                 } else {
-                    User.findOneAndUpdate({ 'email': userEmail }, { facebookId: facebookId }, function (err, updatedUser) {
+                    User.findOneAndUpdate({ 'email': userEmail }, { facebookId: facebookId, verified: true }, function (err, updatedUser) {
                         if (err) {
                             console.log('error while updating user', err)
                         } else {
@@ -152,7 +154,7 @@ passport.use(new FacebookStrategy({
                 //facebook id가 없으면
                 //update user facebook id field
             } else {
-                User.create({ email: userEmail, username, facebookId }, function (err, user) {
+                User.create({ email: userEmail, username, facebookId, verified: true }, function (err, user) {
                     if (err) {
                         console.log(err)
                     } else {
@@ -201,6 +203,7 @@ app.use('/partners/auth', partnerAuthRoutes);
 app.use('/partners/studios', partnerStudioRoutes);
 app.use('/map', mapRoutes);
 app.use('/event', eventRoutes);
+app.use('/sms', smsRoutes);
 
 
 app.listen(port, () => {

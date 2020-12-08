@@ -9,7 +9,7 @@ const User = require('../models/user');
 
 router.get('/enrolled', middleware.isLoggedInAsUser, function (req, res) {
     console.log('last test!!')
-    Event.find({ '_id': { $in: req.user.events } }).populate('studioId', "address").exec((err, enrolledEvents) => {
+    Event.find({ '_id': { $in: req.user.events } }).populate('studioId', ["address", "title"]).exec((err, enrolledEvents) => {
         if (err) {
             console.log(err);
         } else {

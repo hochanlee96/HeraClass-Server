@@ -8,6 +8,7 @@ var UserSchema = new mongoose.Schema({
     expires: Date,
     username: String,
     password: String,
+    phoneNumber: String,
     favorites: [
         {
             type: mongoose.Schema.Types.ObjectId,

@@ -27,13 +27,22 @@ function saveStudios() {
                         savedStudio.reviews.push(createdReview);
                         savedStudio.save();
                         console.log('review successfully saved')
-                        Event.create({ ...seedData.event, studioId: savedStudio._id, date: new Date(new Date().getTime() + 720000) }, function (err, createdEvent) {
+                        Event.create({ ...seedData.event, studioId: savedStudio._id, date: new Date(new Date().getTime() + 7200000) }, function (err, createdEvent) {
                             if (err) {
                                 console.log(err);
                             } else {
                                 savedStudio.events.push(createdEvent);
                                 savedStudio.save();
                                 console.log('event successfully saved')
+                                Event.create({ ...seedData.event, studioId: savedStudio._id, date: new Date(new Date().getTime() + 604800000) }, function (err, createdEvent) {
+                                    if (err) {
+                                        console.log(err);
+                                    } else {
+                                        savedStudio.events.push(createdEvent);
+                                        savedStudio.save();
+                                        console.log('event successfully saved')
+                                    }
+                                })
                             }
                         })
                     };

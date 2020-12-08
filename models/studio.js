@@ -12,6 +12,7 @@ var StudioSchema = new mongoose.Schema({
     category: [
         { type: mongoose.Schema.Types.String }
     ],
+    amenities: [{ type: mongoose.Schema.Types.String }],
     details: {
         tel: String
     },
