@@ -41,7 +41,6 @@ router.get("/search", function (req, res) {
         maxLng: Number(center[1]) + coordDistance[queryString.maxDistance],
         minLng: Number(center[1]) - coordDistance[queryString.maxDistance],
     }
-    let amenities;
     const query = {};
     query.$and = [{ "coordinates.latitude": { $lte: boundary.maxLat, $gte: boundary.minLat }, "coordinates.longitude": { $lte: boundary.maxLng, $gte: boundary.minLng } }]
     if (queryString.amenities) {
@@ -51,6 +50,11 @@ router.get("/search", function (req, res) {
     }
     if (queryString.keyword) {
         query.$and = [...query.$and, { $or: [{ title: { $regex: queryString.keyword, $options: "i" } }, { bigAddress: { $regex: queryString.keyword, $options: "i" } }, { category: { $regex: queryString.keyword, $options: "i" } }] }]
+    }
+    if (queryString.category) {
+        const category = queryString.category.split(',');
+        const categoryQuery = { "category": { $in: category } }
+        query.$and = [...query.$and, { ...categoryQuery }]
     }
     Studio.find({ ...query }).populate("reviews", 'rating').exec((err, searchedStudios) => {
         if (err) {

@@ -3,13 +3,17 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     mongoose = require("mongoose"),
     passport = require("passport"),
+    session = require('express-session'),
+    MongoStore = require('connect-mongo')(session),
     flash = require('connect-flash'),
     LocalStrategy = require("passport-local").Strategy,
     GoogleStrategy = require('passport-google-oauth').OAuth2Strategy,
     FacebookStrategy = require('passport-facebook').Strategy,
     dataInitializer = require('./seedDataSaver'),
     User = require("./models/user"),
-    Partner = require("./models/partner");
+    Partner = require("./models/partner"),
+    randomA = require('randomstring'),
+    randomB = require('randomstring');
 
 mongoose.connect("mongodb://localhost:27017/heraclass", { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true });
 // mongoose.connect("mongodb+srv://hochan:lee@cluster0.v5xbw.mongodb.net/yelp_camp?retryWrites=true&w=majority");
@@ -27,7 +31,7 @@ const mapRoutes = require('./routes/map');
 const eventRoutes = require('./routes/event');
 const smsRoutes = require('./routes/sms');
 
-const { Strategy } = require('passport');
+// const { Strategy } = require('passport');
 
 // var cors = function (req, res, next) {
 //     var whitelist = [
@@ -68,11 +72,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(flash());
 
-app.use(require("express-session")({
+app.use(session({
     secret: "HERA_CLASS",
-    resave: true,
+    resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 1000 * 60 * 60, secure: false }
+    cookie: { maxAge: 1000 * 60 * 60, secure: false },
+    store: new MongoStore({ mongooseConnection: mongoose.connection, ttl: 1000 * 60 * 60 })
 }));
 
 app.use(passport.initialize());
