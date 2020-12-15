@@ -3,7 +3,6 @@ const router = express.Router();
 
 const Studio = require('../../models/studio');
 const middleware = require('../../middleware');
-const { search } = require('../user/auth');
 
 router.post('/', middleware.isLoggedInAsPartner, function (req, res) {
     Studio.create({ ...req.body, postedBy: req.user.email }, function (err, newStudio) {

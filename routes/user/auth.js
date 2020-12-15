@@ -31,11 +31,11 @@ router.get('/verify', middleware.isLoggedInAsUser, function (req, res) {
         if (err) {
             res.send({ error: 'error has occured' })
         } else {
-            const verificationUrl = `http://localhost:3001/user/auth/verify/${verificationString}`
+            const verificationUrl = `${process.env.SERVER_BASE_URL}/user/auth/verify/${verificationString}`
             let mailOptions = {
                 from: 'heraclass.tester@gmail.com',
                 // to: req.user.email,
-                to: 'j65hcl@gmail.com',
+                to: "j65hcl@gmail.com",
                 subject: 'Testing and testing',
                 html: `<p>Verify Your Email!</p><a href=${verificationUrl}>Click Here</a>`
             }
@@ -56,10 +56,10 @@ router.get('/verify/:verificationstring', middleware.isLoggedInAsUser, function 
     if (req.user.verificationString === req.params.verificationstring && new Date < req.user.expires) {
         User.findByIdAndUpdate(req.user._id, { verified: true }, (err, user) => {
             console.log('user?', user)
-            res.redirect('http://localhost:3000/profile')
+            res.redirect(process.env.CLIENT_BASE_URL + '/profile')
         })
     } else {
-        res.redirect('http://localhost:3000/profile')
+        res.redirect(process.env.CLIENT_BASE_URL + '/profile')
     }
 })
 
@@ -108,8 +108,8 @@ router.post('/verify-phone', function (req, res) {
                 const method = "POST";
                 const url = "/sms/v2/services/ncp:sms:kr:260838663750:heraclass/messages";
                 const timestamp = Date.now().toString();
-                const accessKey = "1F3CEFD02EB39173D187";
-                const secretKey = "04D3A9A2DC9C417A16C3119C8ACBA621C3446B6D";
+                const accessKey = process.env.NAVER_API_ACCESS_KEY;
+                const secretKey = process.env.NAVER_API_SECRET_KEY;
                 const verificationNumber = randomstring.generate({ length: 6, charset: 'numeric' });
 
                 req.session.verificationNumber = verificationNumber;
@@ -126,17 +126,17 @@ router.post('/verify-phone', function (req, res) {
                 var hash = hmac.finalize();
                 var signature = hash.toString(CryptoJS.enc.Base64);
 
-                fetch("https://sens.apigw.ntruss.com/sms/v2/services/ncp:sms:kr:260838663750:heraclass/messages", {
+                fetch(process.env.NAVER_API_BASE_URL + "/sms/v2/services/ncp:sms:kr:260838663750:heraclass/messages", {
                     method: 'POST',
                     headers: {
                         'x-ncp-apigw-signature-v2': signature,
                         'x-ncp-apigw-timestamp': timestamp,
-                        'x-ncp-iam-access-key': '1F3CEFD02EB39173D187',
+                        'x-ncp-iam-access-key': process.env.NAVER_API_ACCESS_KEY,
                         'Content-Type': 'application/json; charset=utf-8'
                     },
                     body: JSON.stringify({
                         "type": "SMS",
-                        "from": "01063905146",
+                        "from": process.env.BUSINESS_PHONE_NUMBER,
                         "content": `${verificationNumber}`,
                         "messages": [
                             {
@@ -166,8 +166,8 @@ router.post('/find/id', function (req, res) {
             const method = "POST";
             const url = "/sms/v2/services/ncp:sms:kr:260838663750:heraclass/messages";
             const timestamp = Date.now().toString();
-            const accessKey = "1F3CEFD02EB39173D187";
-            const secretKey = "04D3A9A2DC9C417A16C3119C8ACBA621C3446B6D";
+            const accessKey = process.env.NAVER_API_ACCESS_KEY;
+            const secretKey = process.env.NAVER_API_SECRET_KEY
 
             var hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, secretKey);
             hmac.update(method);
@@ -181,17 +181,17 @@ router.post('/find/id', function (req, res) {
             var hash = hmac.finalize();
             var signature = hash.toString(CryptoJS.enc.Base64);
 
-            fetch("https://sens.apigw.ntruss.com/sms/v2/services/ncp:sms:kr:260838663750:heraclass/messages", {
+            fetch(process.env.NAVER_API_BASE_URL + "/sms/v2/services/ncp:sms:kr:260838663750:heraclass/messages", {
                 method: 'POST',
                 headers: {
                     'x-ncp-apigw-signature-v2': signature,
                     'x-ncp-apigw-timestamp': timestamp,
-                    'x-ncp-iam-access-key': '1F3CEFD02EB39173D187',
+                    'x-ncp-iam-access-key': process.env.NAVER_API_ACCESS_KEY,
                     'Content-Type': 'application/json; charset=utf-8'
                 },
                 body: JSON.stringify({
                     "type": "SMS",
-                    "from": "01063905146",
+                    "from": process.env.BUSINESS_PHONE_NUMBER,
                     "content": `Your Email is : ${foundUser.email}`,
                     "messages": [
                         {
@@ -243,8 +243,8 @@ router.post('/find/password/send-verification', function (req, res) {
                 const method = "POST";
                 const url = "/sms/v2/services/ncp:sms:kr:260838663750:heraclass/messages";
                 const timestamp = Date.now().toString();
-                const accessKey = "1F3CEFD02EB39173D187";
-                const secretKey = "04D3A9A2DC9C417A16C3119C8ACBA621C3446B6D";
+                const accessKey = process.env.NAVER_API_ACCESS_KEY;
+                const secretKey = process.env.NAVER_API_SECRET_KEY
 
                 var hmac = CryptoJS.algo.HMAC.create(CryptoJS.algo.SHA256, secretKey);
                 hmac.update(method);
@@ -258,17 +258,17 @@ router.post('/find/password/send-verification', function (req, res) {
                 var hash = hmac.finalize();
                 var signature = hash.toString(CryptoJS.enc.Base64);
 
-                fetch("https://sens.apigw.ntruss.com/sms/v2/services/ncp:sms:kr:260838663750:heraclass/messages", {
+                fetch(process.env.NAVER_API_BASE_URL + "/sms/v2/services/ncp:sms:kr:260838663750:heraclass/messages", {
                     method: 'POST',
                     headers: {
                         'x-ncp-apigw-signature-v2': signature,
                         'x-ncp-apigw-timestamp': timestamp,
-                        'x-ncp-iam-access-key': '1F3CEFD02EB39173D187',
+                        'x-ncp-iam-access-key': process.env.NAVER_API_ACCESS_KEY,
                         'Content-Type': 'application/json; charset=utf-8'
                     },
                     body: JSON.stringify({
                         "type": "SMS",
-                        "from": "01063905146",
+                        "from": process.env.BUSINESS_PHONE_NUMBER,
                         "content": `인증번호는 : [${verificationNumber}] 입니다`,
                         "messages": [
                             {
@@ -335,14 +335,14 @@ router.get('/google/callback',
     passport.authenticate('google', { failureRedirect: '/user/auth/login-fail' }),
     function (req, res) {
         console.log(req.get('origin'))
-        return res.redirect('http://localhost:3000')
+        return res.redirect(process.env.CLIENT_BASE_URL)
     });
 
 router.get('/facebook/callback',
     passport.authenticate('facebook', { failureRedirect: 'user/auth/login-fail' }),
     function (req, res) {
         console.log(req.get('origin'))
-        return res.redirect('http://localhost:3000')
+        return res.redirect(process.env.CLIENT_BASE_URL)
     });
 
 router.get('/login-fail', function (req, res) {
@@ -384,7 +384,7 @@ router.get('/user-data', middleware.isLoggedInAsUser, function (req, res) {
     }
     console.log('user :', user_info)
     console.log('session user', req.user)
-    console.log('session', req.session);
+    console.log('sessionid', req.session.id);
     return res.json(user_info);
 })
 

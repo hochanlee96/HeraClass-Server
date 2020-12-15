@@ -27,7 +27,6 @@ router.post('/login', passport.authenticate('partner-local', { failureRedirect: 
 })
 
 router.get('/partner-data', middleware.isLoggedInAsPartner, function (req, res) {
-    console.log('redirected')
     const user_info = {}
     user_info.username = req.user.username;
     user_info.email = req.user.email;

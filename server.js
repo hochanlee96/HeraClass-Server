@@ -14,8 +14,9 @@ var express = require('express'),
     Partner = require("./models/partner"),
     randomA = require('randomstring'),
     randomB = require('randomstring');
+require('dotenv').config();
 
-mongoose.connect("mongodb://localhost:27017/heraclass", { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true });
+mongoose.connect(process.env.MONGODB_URI || process.env.MONGODB_CONNECT_URL, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true });
 // mongoose.connect("mongodb+srv://hochan:lee@cluster0.v5xbw.mongodb.net/yelp_camp?retryWrites=true&w=majority");
 dataInitializer();
 const port = process.env.PORT || 3001;
@@ -48,7 +49,7 @@ const smsRoutes = require('./routes/sms');
 // }
 // app.use(cors());
 
-var allowedDomains = ['http://localhost:3000', 'http://localhost:3003']
+var allowedDomains = [process.env.CLIENT_BASE_URL, process.env.PARTNER_BASE_URL]
 app.use(cors({
     credentials: true,
     origin: function (origin, callback) {
@@ -73,7 +74,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(flash());
 
 app.use(session({
-    secret: "HERA_CLASS",
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: 1000 * 60 * 60, secure: false },
@@ -87,9 +88,9 @@ app.use(passport.session());
 passport.use('user-local', User.createStrategy());
 passport.use('partner-local', Partner.createStrategy());
 passport.use(new GoogleStrategy({
-    clientID: '350520742740-9hml57j4kd3vv74vja6fbp40vj1q7qho.apps.googleusercontent.com',
-    clientSecret: '250cWXdXfo9rAE4GKuiDw5DB',
-    callbackURL: "http://localhost:3001/user/auth/google/callback",
+    clientID: process.env.GOOGLE_API_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_API_CLIENT_SECRET,
+    callbackURL: process.env.SERVER_BASE_URL + "/user/auth/google/callback",
     profileFields: ['id', 'displayName', 'email']
 
 },
@@ -130,9 +131,9 @@ passport.use(new GoogleStrategy({
 ));
 
 passport.use(new FacebookStrategy({
-    clientID: '465324197776374',
-    clientSecret: '5c6913ddbf0ee3320822916099cc8c4e',
-    callbackURL: "http://localhost:3001/user/auth/facebook/callback",
+    clientID: process.env.FACEBOOK_API_CLIENT_ID,
+    clientSecret: process.env.FACEBOOK_API_CLIENT_SECRET,
+    callbackURL: process.env.SERVER_BASE_URL + "/user/auth/facebook/callback",
     profileFields: ['id', 'emails', 'displayName']
 },
     function (accessToken, refreshToken, profile, done) {
