@@ -16,6 +16,8 @@ var express = require('express'),
     randomB = require('randomstring');
 require('dotenv').config();
 
+console.log('hello world');
+
 mongoose.connect(process.env.MONGODB_URI || process.env.MONGODB_CONNECT_URL, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true });
 // mongoose.connect("mongodb+srv://hochan:lee@cluster0.v5xbw.mongodb.net/yelp_camp?retryWrites=true&w=majority");
 dataInitializer();
