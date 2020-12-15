@@ -22,8 +22,6 @@ dataInitializer();
 const port = process.env.PORT || 3001;
 const cors = require('cors');
 
-console.log('hello world')
-
 const userAuthRoutes = require('./routes/user/auth');
 const userStudioRoutes = require('./routes/user/studio-search');
 const reviewRoutes = require('./routes/user/review');
